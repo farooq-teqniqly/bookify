@@ -31,12 +31,12 @@ namespace Bookify.Domain.Apartments
             Amenities = amenities;
         }
 
-        public Address Address { get; private set; }
-        public List<Amenity> Amenities { get; private set; }
-        public Money CleaningFee { get; set; }
-        public Description Description { get; private set; }
+        public Address Address { get; }
+        public List<Amenity> Amenities { get; }
+        public Money CleaningFee { get; internal set; }
+        public Description Description { get; }
         public UtcDateTime? LastBookedOn { get; internal set; }
-        public Name Name { get; private set; }
-        public Money Price { get; set; }
+        public Name Name { get; }
+        public Money Price { get; internal set; }
     }
 }

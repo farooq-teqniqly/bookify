@@ -4,10 +4,12 @@
     {
         public static readonly UtcDateTime Now = new(DateTimeOffset.UtcNow);
 
-        private UtcDateTime(DateTimeOffset value) => Value = value;
+        private readonly DateTimeOffset _value;
 
-        public DateTimeOffset Value { get; init; }
+        private UtcDateTime(DateTimeOffset value) => _value = value;
 
-        public DateOnly GetDate() => DateOnly.FromDateTime(Value.UtcDateTime);
+        public DateTimeOffset Value => _value;
+
+        public DateOnly GetDate() => DateOnly.FromDateTime(_value.UtcDateTime);
     }
 }

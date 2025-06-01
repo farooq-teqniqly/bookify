@@ -34,19 +34,19 @@ namespace Bookify.Domain.Bookings
             UserId = userId;
         }
 
-        public Money AmenitiesUpCharge { get; private set; }
-        public Guid ApartmentId { get; private set; }
-        public UtcDateTime? CancelledOn { get; private set; }
-        public Money CleaningFee { get; private set; }
-        public UtcDateTime? CompletedOn { get; private set; }
-        public UtcDateTime? ConfirmedOn { get; private set; }
-        public UtcDateTime CreatedOn { get; private set; }
-        public DateRange Duration { get; private set; }
-        public Money PriceForPeriod { get; private set; }
-        public UtcDateTime? RejectedOn { get; private set; }
-        public BookingStatus Status { get; private set; }
-        public Money TotalPrice { get; private set; }
-        public Guid UserId { get; private set; }
+        public Money AmenitiesUpCharge { get; }
+        public Guid ApartmentId { get; }
+        public UtcDateTime? CancelledOn { get; internal set; }
+        public Money CleaningFee { get; }
+        public UtcDateTime? CompletedOn { get; internal set; }
+        public UtcDateTime? ConfirmedOn { get; internal set; }
+        public UtcDateTime CreatedOn { get; }
+        public DateRange Duration { get; }
+        public Money PriceForPeriod { get; }
+        public UtcDateTime? RejectedOn { get; internal set; }
+        public BookingStatus Status { get; internal set; }
+        public Money TotalPrice { get; }
+        public Guid UserId { get; }
 
         public static Booking Reserve(
             Apartment apartment,
@@ -61,7 +61,8 @@ namespace Bookify.Domain.Bookings
             ArgumentNullException.ThrowIfNull(pricingService);
             ArgumentNullException.ThrowIfNull(reservationTime);
 
-            var pricingDetails = pricingService.CalculatePrice(apartment, duration);
+            var calculatePriceResult = pricingService.CalculatePrice(apartment, duration);
+            var pricingDetails = calculatePriceResult.GetValue();
 
             var booking = new Booking(
                 Guid.NewGuid(),

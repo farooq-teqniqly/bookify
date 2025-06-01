@@ -24,7 +24,7 @@ namespace Bookify.Domain.Tests.Abstractions
         public void Constructor_WithEmptyGuid_ThrowsArgumentException()
         {
             // Act
-            Action act = () => new TestEntity(Guid.Empty);
+            Action act = () => _ = new TestEntity(Guid.Empty);
 
             // Assert
             act.Should().Throw<ArgumentException>().WithMessage("Id cannot be the empty guid.");

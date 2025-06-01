@@ -6,6 +6,17 @@ namespace Bookify.Domain.Tests.Shared
     public class MoneyTests
     {
         [Fact]
+        public void Constructor_ThrowsArgumentNullException_WhenCurrencyIsNull()
+        {
+            // Arrange
+            decimal amount = 10m;
+            Currency? currency = null;
+
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => new Money(amount, currency!));
+        }
+
+        [Fact]
         public void IsZero_ReturnsFalse_WhenAmountIsNotZero()
         {
             var money = new Money(10m, Currency.Usd);

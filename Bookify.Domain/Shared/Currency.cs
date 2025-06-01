@@ -13,7 +13,7 @@ public sealed record Currency
         All.FirstOrDefault(c => c.Code == code)
         ?? throw new ArgumentException("Invalid currency code.");
 
-    public string Code { get; init; }
+    public string Code { get; }
 
     private Currency(string code) => Code = code;
 }

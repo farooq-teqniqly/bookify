@@ -1,8 +1,10 @@
-﻿namespace Bookify.Domain.Users
+﻿using Bookify.Results;
+
+namespace Bookify.Domain.Users
 {
     public interface IUserRepository
     {
-        void Add(User user);
-        Task<User?> GetByIdAsync(Guid id, CancellationToken ct = default);
+        Result<Unit> Add(User user);
+        Task<Result<User>> GetByIdAsync(Guid id, CancellationToken ct = default);
     }
 }

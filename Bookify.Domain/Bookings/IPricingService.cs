@@ -1,8 +1,9 @@
 ﻿using Bookify.Domain.Apartments;
+using Bookify.Results;
 
 namespace Bookify.Domain.Bookings;
 
 public interface IPricingService
 {
-    PricingDetails CalculatePrice(Apartment apartment, DateRange period);
+    Result<PricingDetails> CalculatePrice(Apartment apartment, DateRange period);
 }

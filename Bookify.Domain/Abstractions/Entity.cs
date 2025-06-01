@@ -14,7 +14,7 @@
             Id = id;
         }
 
-        public Guid Id { get; init; }
+        public Guid Id { get; }
 
         public void ClearDomainEvents() => _domainEvents.Clear();
 

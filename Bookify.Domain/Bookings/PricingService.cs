@@ -1,11 +1,12 @@
 ﻿using Bookify.Domain.Apartments;
 using Bookify.Domain.Shared;
+using Bookify.Results;
 
 namespace Bookify.Domain.Bookings
 {
-    public sealed class PricingService
+    public sealed class PricingService : IPricingService
     {
-        public PricingDetails CalculatePrice(Apartment apartment, DateRange period)
+        public Result<PricingDetails> CalculatePrice(Apartment apartment, DateRange period)
         {
             ArgumentNullException.ThrowIfNull(apartment);
             ArgumentNullException.ThrowIfNull(period);
@@ -44,12 +45,14 @@ namespace Bookify.Domain.Bookings
 
             totalPrice += amenitiesUpCharge;
 
-            return new PricingDetails(
+            var pricingDetails = new PricingDetails(
                 priceForPeriod,
                 apartment.CleaningFee,
                 amenitiesUpCharge,
                 totalPrice
             );
+
+            return Result.Success(pricingDetails);
         }
     }
 }

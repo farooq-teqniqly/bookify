@@ -13,9 +13,9 @@ namespace Bookify.Domain.Users
             Email = email;
         }
 
-        public Email Email { get; private set; }
-        public FirstName FirstName { get; private set; }
-        public LastName LastName { get; private set; }
+        public Email Email { get; }
+        public FirstName FirstName { get; }
+        public LastName LastName { get; }
 
         public static User Create(FirstName firstName, LastName lastName, Email email)
         {

@@ -3,6 +3,7 @@ using Bookify.Domain.Bookings;
 using Bookify.Domain.Bookings.Events;
 using Bookify.Domain.Shared;
 using Bookify.Domain.Users;
+using Bookify.Results;
 using FluentAssertions;
 using NSubstitute;
 
@@ -215,7 +216,9 @@ namespace Bookify.Domain.Tests.Bookings
             var duration = CreateDateRange();
             var reservationTime = UtcDateTime.Now;
             var pricingDetails = CreatePricingDetails(duration);
-            pricingService.CalculatePrice(apartment, duration).Returns(pricingDetails);
+            pricingService
+                .CalculatePrice(apartment, duration)
+                .Returns(Result.Success(pricingDetails));
 
             var booking = Booking.Reserve(
                 apartment,
@@ -309,7 +312,9 @@ namespace Bookify.Domain.Tests.Bookings
 
             var pricingService = Substitute.For<IPricingService>();
             var pricingDetails = CreatePricingDetails(duration);
-            pricingService.CalculatePrice(apartment, duration)!.Returns(pricingDetails);
+            pricingService
+                .CalculatePrice(apartment, duration)!
+                .Returns(Result.Success(pricingDetails));
 
             // Act
             var booking = Booking.Reserve(
@@ -339,7 +344,9 @@ namespace Bookify.Domain.Tests.Bookings
             var reservationTime = UtcDateTime.Now;
             var pricingService = Substitute.For<IPricingService>();
             var pricingDetails = CreatePricingDetails(duration);
-            pricingService.CalculatePrice(apartment, duration)!.Returns(pricingDetails);
+            pricingService
+                .CalculatePrice(apartment, duration)!
+                .Returns(Result.Success(pricingDetails));
 
             // Act
             var booking = Booking.Reserve(
@@ -445,11 +452,10 @@ namespace Bookify.Domain.Tests.Bookings
         {
             var pricingService = Substitute.For<IPricingService>();
             var duration = CreateDateRange();
-            var apartment = CreateApartment();
             var pricingDetails = CreatePricingDetails(duration);
             pricingService
                 .CalculatePrice(Arg.Any<Apartment>(), Arg.Any<DateRange>())
-                .Returns(pricingDetails);
+                .Returns(Result.Success(pricingDetails));
             return pricingService;
         }
 
@@ -469,7 +475,9 @@ namespace Bookify.Domain.Tests.Bookings
 
             var pricingService = Substitute.For<IPricingService>();
             var pricingDetails = CreatePricingDetails(duration);
-            pricingService.CalculatePrice(apartment, duration).Returns(pricingDetails);
+            pricingService
+                .CalculatePrice(apartment, duration)
+                .Returns(Result.Success(pricingDetails));
 
             return Booking.Reserve(apartment, user, duration, reservationTime, pricingService);
         }
@@ -492,7 +500,9 @@ namespace Bookify.Domain.Tests.Bookings
 
             var pricingService = Substitute.For<IPricingService>();
             var pricingDetails = CreatePricingDetails(duration);
-            pricingService.CalculatePrice(apartment, duration).Returns(pricingDetails);
+            pricingService
+                .CalculatePrice(apartment, duration)
+                .Returns(Result.Success(pricingDetails));
 
             return Booking.Reserve(apartment, user, duration, reservationTime, pricingService);
         }

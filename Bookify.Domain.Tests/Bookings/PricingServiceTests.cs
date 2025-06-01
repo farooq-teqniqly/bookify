@@ -19,7 +19,7 @@ namespace Bookify.Domain.Tests.Bookings
             var service = new PricingService();
 
             // Act
-            var result = service.CalculatePrice(apartment, period);
+            var result = service.CalculatePrice(apartment, period).GetValue();
 
             // Assert
             var basePrice = 100m * 4; // 400
@@ -33,16 +33,12 @@ namespace Bookify.Domain.Tests.Bookings
         public void CalculatePrice_ShouldHandleNoAmenities()
         {
             // Arrange
-            var apartment = CreateApartment(
-                pricePerDay: 120m,
-                cleaningFee: 0m,
-                amenities: new List<Amenity>()
-            );
+            var apartment = CreateApartment(pricePerDay: 120m, cleaningFee: 0m, amenities: []);
             var period = CreateDateRange(1);
             var service = new PricingService();
 
             // Act
-            var result = service.CalculatePrice(apartment, period);
+            var result = service.CalculatePrice(apartment, period).GetValue();
 
             // Assert
             result.PriceForPeriod.Amount.Should().Be(120m);
@@ -60,7 +56,7 @@ namespace Bookify.Domain.Tests.Bookings
             var service = new PricingService();
 
             // Act
-            var result = service.CalculatePrice(apartment, period);
+            var result = service.CalculatePrice(apartment, period).GetValue();
 
             // Assert
             result.PriceForPeriod.Amount.Should().Be(200m);
@@ -78,7 +74,7 @@ namespace Bookify.Domain.Tests.Bookings
             var service = new PricingService();
 
             // Act
-            var result = service.CalculatePrice(apartment, period);
+            var result = service.CalculatePrice(apartment, period).GetValue();
 
             // Assert
             result.PriceForPeriod.Amount.Should().Be(300m);
@@ -101,7 +97,7 @@ namespace Bookify.Domain.Tests.Bookings
             var service = new PricingService();
 
             // Act
-            var result = service.CalculatePrice(apartment, period);
+            var result = service.CalculatePrice(apartment, period).GetValue();
 
             // Assert
             var basePrice = 80m * 5; // 400
@@ -109,8 +105,8 @@ namespace Bookify.Domain.Tests.Bookings
             var total = basePrice + 20m + upCharge; // 400 + 20 + 24 = 444
             result.PriceForPeriod.Amount.Should().Be(400m);
             result.ApartmentCleaningFee.Amount.Should().Be(20m);
-            result.AmenitiesUpCharge.Amount.Should().Be(24m);
-            result.TotalPrice.Amount.Should().Be(444m);
+            result.AmenitiesUpCharge.Amount.Should().Be(upCharge);
+            result.TotalPrice.Amount.Should().Be(total);
         }
 
         [Fact]
@@ -152,7 +148,7 @@ namespace Bookify.Domain.Tests.Bookings
                 new Description("desc"),
                 new Name("Test Apartment"),
                 new Money(pricePerDay, _defaultCurrency),
-                amenities ?? new List<Amenity>()
+                amenities ?? []
             );
         }
 
