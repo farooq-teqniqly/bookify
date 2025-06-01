@@ -55,7 +55,7 @@ namespace Bookify.Domain.Tests.Users
             LastName lastName = new LastName("Doe");
 
             // Act
-            Action act = () => User.Create(firstName, lastName, null);
+            Action act = () => User.Create(firstName, lastName, null!);
 
             // Assert
             act.Should().Throw<ArgumentNullException>();
@@ -69,7 +69,7 @@ namespace Bookify.Domain.Tests.Users
             Email email = new Email("john.doe@example.com");
 
             // Act
-            Action act = () => User.Create(null, lastName, email);
+            Action act = () => User.Create(null!, lastName, email);
 
             // Assert
             act.Should().Throw<ArgumentNullException>();
@@ -83,7 +83,7 @@ namespace Bookify.Domain.Tests.Users
             Email email = new Email("john.doe@example.com");
 
             // Act
-            Action act = () => User.Create(firstName, null, email);
+            Action act = () => User.Create(firstName, null!, email);
 
             // Assert
             act.Should().Throw<ArgumentNullException>();

@@ -1,6 +1,6 @@
 ﻿namespace Bookify.Domain.Apartments;
 
-public record Address
+public sealed record Address
 {
     public string Street { get; }
     public string City { get; }

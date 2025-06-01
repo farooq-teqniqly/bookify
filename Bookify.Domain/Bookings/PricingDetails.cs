@@ -2,7 +2,7 @@
 
 namespace Bookify.Domain.Bookings;
 
-public record PricingDetails
+public sealed record PricingDetails
 {
     public Money PriceForPeriod { get; }
     public Money ApartmentCleaningFee { get; }

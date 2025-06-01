@@ -1,6 +1,6 @@
 ﻿namespace Bookify.Domain.Apartments;
 
-public record Description
+public sealed record Description
 {
     public string Value { get; }
 

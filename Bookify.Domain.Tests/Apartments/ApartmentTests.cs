@@ -77,17 +77,22 @@ namespace Bookify.Domain.Tests.Apartments
             var amenities = new List<Amenity> { Amenity.Spa };
 
             Action act1 = () =>
-                new Apartment(id, null, cleaningFee, description, name, price, amenities);
+                _ = new Apartment(id, null!, cleaningFee, description, name, price, amenities);
+
             Action act2 = () =>
-                new Apartment(id, address, null, description, name, price, amenities);
+                _ = new Apartment(id, address, null!, description, name, price, amenities);
+
             Action act3 = () =>
-                new Apartment(id, address, cleaningFee, null, name, price, amenities);
+                _ = new Apartment(id, address, cleaningFee, null!, name, price, amenities);
+
             Action act4 = () =>
-                new Apartment(id, address, cleaningFee, description, null, price, amenities);
+                _ = new Apartment(id, address, cleaningFee, description, null!, price, amenities);
+
             Action act5 = () =>
-                new Apartment(id, address, cleaningFee, description, name, null, amenities);
+                _ = new Apartment(id, address, cleaningFee, description, name, null!, amenities);
+
             Action act6 = () =>
-                new Apartment(id, address, cleaningFee, description, name, price, null);
+                _ = new Apartment(id, address, cleaningFee, description, name, price, null!);
 
             act1.Should().Throw<ArgumentNullException>();
             act2.Should().Throw<ArgumentNullException>();
@@ -106,7 +111,7 @@ namespace Bookify.Domain.Tests.Apartments
                 new Description("Nice apartment"),
                 new Name("Cozy Place"),
                 new Money(200, Currency.Usd),
-                new List<Amenity> { Amenity.WiFi, Amenity.Gym }
+                [Amenity.WiFi, Amenity.Gym]
             );
         }
     }

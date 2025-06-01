@@ -1,6 +1,6 @@
 ﻿namespace Bookify.Domain.Shared
 {
-    public record UtcDateTime
+    public sealed record UtcDateTime
     {
         public static readonly UtcDateTime Now = new(DateTimeOffset.UtcNow);
 
