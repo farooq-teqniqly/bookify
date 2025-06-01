@@ -9,6 +9,71 @@ namespace Bookify.ArchitectureTests.Domain
     public class DomainArchitectureTests
     {
         [Fact]
+        public void All_Domain_Classes_And_Records_Should_Have_Readonly_Or_InternalSet_Properties()
+        {
+            var domainTypes = typeof(Entity)
+                .Assembly.GetTypes()
+                .Where(t => t.IsClass)
+                .Where(t =>
+                    t.Namespace != null
+                    && t.Namespace.StartsWith("Bookify.Domain")
+                    && t.Namespace != "Bookify.Domain.Abstractions"
+                );
+
+            var violations = new List<string>();
+
+            foreach (var type in domainTypes)
+            {
+                var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                foreach (var prop in properties)
+                {
+                    var setMethod = prop.SetMethod;
+                    // Allow if no setter, or if setter is internal (IsAssembly), but not if public
+                    var isAllowed = setMethod == null || setMethod.IsAssembly;
+
+                    if (!isAllowed)
+                    {
+                        violations.Add(
+                            $"{type.FullName}.{prop.Name} should be readonly or have an internal setter"
+                        );
+                    }
+                }
+            }
+
+            violations
+                .Should()
+                .BeEmpty(
+                    "All domain properties should be readonly or have an internal setter, but found:\n"
+                        + string.Join("\n", violations)
+                );
+        }
+
+        [Fact]
+        public void Domain_Assembly_Should_Only_Depend_On_Bookify_Results_Assembly()
+        {
+            // Arrange
+            var allowedBookifyDependencies = new[] { "Bookify.Domain", "Bookify.Results" };
+
+            var domainAssembly = typeof(Entity).Assembly;
+            var referencedAssemblies = domainAssembly
+                .GetReferencedAssemblies()
+                .Select(a => a.Name)
+                .Where(name => name!.StartsWith("Bookify"))
+                .ToList();
+
+            var disallowed = referencedAssemblies
+                .Where(name => !allowedBookifyDependencies.Contains(name))
+                .ToList();
+
+            disallowed
+                .Should()
+                .BeEmpty(
+                    "Bookify.Domain should only depend on Bookify.Results (and itself), but found:\n"
+                        + string.Join("\n", disallowed)
+                );
+        }
+
+        [Fact]
         public void Domain_Classes_And_Records_Outside_Abstractions_Should_Be_Sealed()
         {
             // Arrange & Act
@@ -74,46 +139,6 @@ namespace Bookify.ArchitectureTests.Domain
         public void Service_Interface_Methods_Should_Return_Result_Or_Result_Of_T()
         {
             AssertInterfaceMethodsReturnResultOrResultOfT("Service");
-        }
-
-        [Fact]
-        public void All_Domain_Classes_And_Records_Should_Have_Readonly_Or_InternalSet_Properties()
-        {
-            var domainTypes = typeof(Entity)
-                .Assembly.GetTypes()
-                .Where(t => t.IsClass)
-                .Where(t =>
-                    t.Namespace != null
-                    && t.Namespace.StartsWith("Bookify.Domain")
-                    && t.Namespace != "Bookify.Domain.Abstractions"
-                );
-
-            var violations = new List<string>();
-
-            foreach (var type in domainTypes)
-            {
-                var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-                foreach (var prop in properties)
-                {
-                    var setMethod = prop.SetMethod;
-                    // Allow if no setter, or if setter is internal (IsAssembly), but not if public
-                    var isAllowed = setMethod == null || setMethod.IsAssembly;
-
-                    if (!isAllowed)
-                    {
-                        violations.Add(
-                            $"{type.FullName}.{prop.Name} should be readonly or have an internal setter"
-                        );
-                    }
-                }
-            }
-
-            violations
-                .Should()
-                .BeEmpty(
-                    "All domain properties should be readonly or have an internal setter, but found:\n"
-                        + string.Join("\n", violations)
-                );
         }
 
         private static void AssertInterfaceMethodsReturnResultOrResultOfT(string interfaceSuffix)
