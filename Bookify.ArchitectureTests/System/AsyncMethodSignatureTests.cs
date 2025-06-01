@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using FluentAssertions;
 
-namespace Bookify.ArchitectureTests
+namespace Bookify.ArchitectureTests.System
 {
     public class AsyncMethodSignatureTests
     {
