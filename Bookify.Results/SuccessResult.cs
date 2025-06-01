@@ -6,7 +6,8 @@ public sealed class SuccessResult<T> : Result<T>
 
     public SuccessResult(T value) => _value = value;
 
-    public override Error GetError() => null!;
+    public override Error GetError() =>
+        throw new InvalidOperationException("Cannot get error from a successful result.");
 
     public override T GetValue() => _value;
 }
