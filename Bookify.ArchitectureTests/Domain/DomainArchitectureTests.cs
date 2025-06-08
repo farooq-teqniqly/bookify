@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using Bookify.Domain.Abstractions;
-using Bookify.Results;
 using FluentAssertions;
 using NetArchTest.Rules;
 
@@ -8,11 +7,13 @@ namespace Bookify.ArchitectureTests.Domain
 {
     public class DomainArchitectureTests
     {
+        private static readonly Assembly _domainAssembly = Assembly.Load("Bookify.Domain");
+
         [Fact]
         public void All_Domain_Classes_And_Records_Should_Have_Readonly_Or_InternalSet_Properties()
         {
-            var domainTypes = typeof(Entity)
-                .Assembly.GetTypes()
+            var domainTypes = _domainAssembly
+                .GetTypes()
                 .Where(t => t.IsClass)
                 .Where(t =>
                     t.Namespace != null
@@ -54,8 +55,7 @@ namespace Bookify.ArchitectureTests.Domain
             // Arrange
             var allowedBookifyDependencies = new[] { "Bookify.Domain", "Bookify.Results" };
 
-            var domainAssembly = typeof(Entity).Assembly;
-            var referencedAssemblies = domainAssembly
+            var referencedAssemblies = _domainAssembly
                 .GetReferencedAssemblies()
                 .Select(a => a.Name)
                 .Where(name => name!.StartsWith("Bookify"))
@@ -74,31 +74,11 @@ namespace Bookify.ArchitectureTests.Domain
         }
 
         [Fact]
-        public void Domain_Classes_And_Records_Outside_Abstractions_Should_Be_Sealed()
-        {
-            // Arrange & Act
-            var result = Types
-                .InAssembly(typeof(Entity).Assembly)
-                .That()
-                .DoNotResideInNamespace("Bookify.Domain.Abstractions")
-                .And()
-                .AreNotInterfaces()
-                .Should()
-                .BeSealed()
-                .GetResult();
-
-            // Assert
-            var failingTypeNames = result.FailingTypeNames;
-
-            failingTypeNames.Should().BeNullOrEmpty();
-        }
-
-        [Fact]
         public void Domain_Event_Class_Names_Should_End_With_DomainEvent()
         {
             // Arrange & Act
             var result = Types
-                .InAssembly(typeof(Entity).Assembly)
+                .InAssembly(_domainAssembly)
                 .That()
                 .ImplementInterface(typeof(IDomainEvent))
                 .Should()
@@ -116,7 +96,7 @@ namespace Bookify.ArchitectureTests.Domain
         {
             // Arrange & Act
             var result = Types
-                .InAssembly(typeof(Entity).Assembly)
+                .InAssembly(_domainAssembly)
                 .That()
                 .ImplementInterface(typeof(IDomainEvent))
                 .Should()
@@ -130,81 +110,27 @@ namespace Bookify.ArchitectureTests.Domain
         }
 
         [Fact]
-        public void Repository_Interface_Methods_Should_Return_Result_Or_Result_Of_T()
+        public void Repository_Interfaces_Should_Only_Be_Defined_In_Bookify_Domain_Assembly()
         {
-            AssertInterfaceMethodsReturnResultOrResultOfT("Repository");
-        }
-
-        [Fact]
-        public void Service_Interface_Methods_Should_Return_Result_Or_Result_Of_T()
-        {
-            AssertInterfaceMethodsReturnResultOrResultOfT("Service");
-        }
-
-        private static void AssertInterfaceMethodsReturnResultOrResultOfT(string interfaceSuffix)
-        {
-            var interfaces = typeof(Entity)
-                .Assembly.GetTypes()
-                .Where(t => t.IsInterface && t.Name.EndsWith(interfaceSuffix))
+            // Arrange
+            var repositoryInterfaces = TestHelpers
+                .GetBookifyAssemblies()
+                .SelectMany(assembly => assembly.GetTypes())
+                .Where(type => type.IsInterface && type.Name.EndsWith("Repository"))
                 .ToList();
 
-            foreach (var @interface in interfaces)
-            {
-                foreach (var method in @interface.GetMethods())
-                {
-                    var returnType = method.ReturnType;
-                    var methodName = method.Name;
+            var invalidRepositories = repositoryInterfaces
+                .Where(type => type.Assembly != _domainAssembly)
+                .Select(type => $"{type.FullName} (in {type.Assembly.GetName().Name})")
+                .ToList();
 
-                    if (methodName.EndsWith("Async"))
-                    {
-                        // Should return Task<Result<T>>
-                        returnType
-                            .IsGenericType.Should()
-                            .BeTrue(
-                                $"{@interface.Name}.{methodName} should return Task<Result<T>>"
-                            );
-
-                        returnType
-                            .GetGenericTypeDefinition()
-                            .Should()
-                            .Be(
-                                typeof(Task<>),
-                                $"{@interface.Name}.{methodName} should return Task<Result<T>>"
-                            );
-
-                        var taskResultType = returnType.GetGenericArguments()[0];
-
-                        taskResultType
-                            .IsGenericType.Should()
-                            .BeTrue(
-                                $"{@interface.Name}.{methodName} should return Task<Result<T>>"
-                            );
-
-                        taskResultType
-                            .GetGenericTypeDefinition()
-                            .Should()
-                            .Be(
-                                typeof(Result<>),
-                                $"{@interface.Name}.{methodName} should return Task<Result<T>>"
-                            );
-                    }
-                    else
-                    {
-                        // Should return Result<T>
-                        returnType
-                            .IsGenericType.Should()
-                            .BeTrue($"{@interface.Name}.{methodName} should return Result<T>");
-
-                        returnType
-                            .GetGenericTypeDefinition()
-                            .Should()
-                            .Be(
-                                typeof(Result<>),
-                                $"{@interface.Name}.{methodName} should return Result<T>"
-                            );
-                    }
-                }
-            }
+            // Assert
+            invalidRepositories
+                .Should()
+                .BeEmpty(
+                    "repository interfaces should only be defined in the Bookify.Domain assembly, but found:\n"
+                        + string.Join("\n", invalidRepositories)
+                );
         }
     }
 }

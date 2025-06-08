@@ -20,4 +20,11 @@ public sealed class BookingError : Error
 
     public static BookingError NotReserved(Guid bookingId) =>
         new("Booking.NotReserved", "The booking has not been reserved.", bookingId);
+
+    public static BookingError Overlap(Guid overlappingBookingId) =>
+        new(
+            "Booking.Overlap",
+            "This booking overlaps with an existing booking.",
+            overlappingBookingId
+        );
 }

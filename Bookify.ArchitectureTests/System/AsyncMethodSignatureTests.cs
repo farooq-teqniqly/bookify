@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
+using Bookify.Application.Abstractions.Messaging;
 using FluentAssertions;
+using MediatR;
 
 namespace Bookify.ArchitectureTests.System
 {
@@ -8,8 +10,8 @@ namespace Bookify.ArchitectureTests.System
         [Fact]
         public void All_Async_Methods_Should_Have_CancellationToken_With_Default_Value()
         {
-            var assemblies = AppDomain
-                .CurrentDomain.GetAssemblies()
+            var assemblies = TestHelpers
+                .GetBookifyAssemblies()
                 .Where(a => a.GetName().Name != null && a.GetName().Name!.StartsWith("Bookify."))
                 .ToList();
 
@@ -78,6 +80,67 @@ namespace Bookify.ArchitectureTests.System
                         );
                 }
             }
+        }
+
+        [Fact]
+        public void All_Methods_Returning_Task_Should_Have_Names_Ending_With_Async()
+        {
+            // Arrange & Act
+            var handleMethodName = "Handle";
+
+            var methodsReturningTask = TestHelpers
+                .GetBookifyAssemblies()
+                .SelectMany(a => a.GetTypes())
+                .Where(t => t.IsClass || t.IsInterface)
+                .Where(t =>
+                    // Exclude classes implementing INotificationHandler<> with a Handle method
+                    !t.GetInterfaces()
+                        .Any(i =>
+                            i.IsGenericType
+                            && i.GetGenericTypeDefinition() == typeof(INotificationHandler<>)
+                        )
+                    || !t.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                        .Any(m => m.Name == handleMethodName)
+                )
+                .Where(t =>
+                    // Exclude classes implementing ICommandHandler<T1, T2> with a Handle method
+                    !t.GetInterfaces()
+                        .Any(i =>
+                            i.IsGenericType
+                            && i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>)
+                        )
+                    || !t.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                        .Any(m => m.Name == handleMethodName)
+                )
+                .SelectMany(t =>
+                    t.GetMethods(
+                        BindingFlags.Public
+                            | BindingFlags.Instance
+                            | BindingFlags.Static
+                            | BindingFlags.DeclaredOnly
+                    )
+                )
+                .Where(m =>
+                    m.ReturnType == typeof(Task)
+                    || (
+                        m.ReturnType.IsGenericType
+                        && m.ReturnType.GetGenericTypeDefinition() == typeof(Task<>)
+                    )
+                )
+                .ToList();
+
+            var invalidMethods = methodsReturningTask
+                .Where(m => !m.Name.EndsWith("Async"))
+                .Select(m => $"{m.DeclaringType?.FullName}.{m.Name}")
+                .ToList();
+
+            // Assert
+            invalidMethods
+                .Should()
+                .BeEmpty(
+                    "The following methods return Task or Task<T> but do not have names ending with 'Async':\n"
+                        + string.Join("\n", invalidMethods)
+                );
         }
     }
 }
